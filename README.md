@@ -1,11 +1,11 @@
 # JennsAHDHtools
 
-Small, browser-based tools that make day-to-day planning a bit easier when ADHD gets in the way.
+Small browser-based tools that help me wrangle my brain when ADHD chaos mode is active.
 
-## Current tool--maybe if I stay focused more to come. 
+## Current tool (more might appear if I stay on task)
 
 ### `prioritymatrix.html`
-A single-file **pairwise priority matrix** for quickly choosing what to do first.
+A single-file **pairwise priority matrix** for figuring out what to do first without overthinking it for 45 minutes.
 
 - Click a decision cell to cycle winner: **column task → row task → clear**
 - Edit each task’s short name directly in the row header
@@ -27,7 +27,7 @@ Optional (local server):
 
 ## Project status
 
-This is a small personal utility project. PRs and issues are welcome for small improvements and bug fixes.
+Small personal utility project. PRs and issues are welcome for focused improvements and bug fixes.
 
 ## Contributing
 

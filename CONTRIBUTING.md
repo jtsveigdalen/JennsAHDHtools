@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve this project.
+Thanks for helping improve this weird little productivity lab.
 
 ## Scope
 
@@ -27,7 +27,7 @@ Please keep changes:
 - [ ] No unrelated refactors
 - [ ] Manual test notes are included in PR description
 - [ ] Docs updated if behavior changed
-- [ ] Note any accessiblity features, etc.  
+- [ ] Note any accessibility changes (if relevant)
 
 ## Commit messages
 

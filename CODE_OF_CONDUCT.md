@@ -11,8 +11,9 @@ Participants are expected to:
 - Focus feedback on ideas, not people
 - Avoid harassment, insults, or discrimination
 
-## TRANS RIGHTS ARE HUMAN RIGHTS ##
-        - END OF DISCUSSION
+## Values
+
+People of all identities are welcome here. Trans rights are human rights.
 
 ## Unacceptable behavior
 
@@ -31,4 +32,4 @@ Project maintainers may remove, edit, or reject comments, issues, commits, or pu
 
 If you experience or witness unacceptable behavior, open an issue in this repository with context and screenshots if relevant.
 
-Maintainers will review reports and respond as promptly as possible. But realistically I am just one person so...
+Maintainers will review reports and respond as promptly as possible. This is a small one-person project, so response time may vary.
