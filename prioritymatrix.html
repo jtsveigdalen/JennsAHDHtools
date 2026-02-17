@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PRIORITY MATRIX — Pairwise Vote Poster</title>
+
+  <style>
+    :root{
+      --BG: #f6f5f2;
+      --PANEL: #ffffff;
+      --INK: #1b1b1b;
+      --MUTED: #6b6b6b;
+      --GRIDLINE: rgba(0,0,0,.08);
+      --SHADOW: 0 10px 25px rgba(0,0,0,.08);
+
+      --RADIUS_LG: 18px;
+      --RADIUS_MD: 12px;
+
+      --C1: #2b6cff;
+      --C2: #ff2fb3;
+      --C3: #7a4bd1;
+      --C4: #ff7a1a;
+      --C5: #d6a400;
+      --C6: #1a8f4e;
+
+      --C_NEUTRAL: #111111;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--INK);
+      background:linear-gradient(#fbfaf7, var(--BG));
+    }
+
+    .WRAP{
+      max-width: 1900px; /* WIDER OVERALL CANVAS */
+      margin: 24px auto 40px;
+      padding: 0 18px;
+    }
+
+    header{
+      display:flex;
+      gap:16px;
+      align-items:flex-end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+
+    .TITLEBLOCK h1{
+      margin:0;
+      font-size: 28px;
+      letter-spacing:-0.02em;
+    }
+
+    .TITLEBLOCK p{
+      margin:6px 0 0;
+      color:var(--MUTED);
+      max-width: 105ch;
+      line-height: 1.35;
+    }
+
+    .FILTERS{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:center;
+      background: rgba(255,255,255,.65);
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      padding: 10px 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+
+    .GROUP{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      padding-right: 10px;
+      border-right: 1px solid var(--GRIDLINE);
+    }
+    .GROUP:last-child{ border-right:none; padding-right:0; }
+
+    label{
+      font-size: 12px;
+      color: var(--MUTED);
+      margin-right: 2px;
+    }
+
+    .BTN{
+      border:1px solid var(--GRIDLINE);
+      background: var(--PANEL);
+      border-radius: 999px;
+      padding: 7px 12px;
+      cursor:pointer;
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: 0.01em;
+    }
+    .BTN:hover{ filter: brightness(0.98); }
+    .BTN.PRIMARY{
+      border-color: rgba(0,0,0,.16);
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+
+    .BOARD{
+      margin-top: 14px;
+      background: rgba(255,255,255,.55);
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      padding: 14px;
+      box-shadow: var(--SHADOW);
+    }
+
+    /* ============================================================
+       ## LAYOUT — MAKE MATRIX AREA MUCH WIDER
+       ============================================================ */
+    .LAYOUT{
+      display:grid;
+      grid-template-columns: minmax(880px, 1fr) 340px; /* WIDE MATRIX REGION */
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 1120px){
+      .LAYOUT{ grid-template-columns: 1fr; }
+    }
+
+    /* ================================
+       ## ✶~✶~✶~✶~✶~✶~✶🦄
+       ================================ */
+
+    .MATRIX{
+      width: 100%;
+      overflow:auto;                 /* SCROLL ONLY WHEN NEEDED */
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      background: rgba(255,255,255,.55);
+      padding: 12px;
+    }
+
+    .GRID{
+      display:grid;
+      gap: 8px;
+      align-items: stretch;
+      width: max-content;            /* GRID CAN GROW; CONTAINER IS WIDE */
+      min-width: 100%;               /* FILL WHEN SMALLER THAN CONTAINER */
+    }
+
+    .ROWHEAD{
+      background: rgba(255,255,255,.9);
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_MD);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding: 8px 8px;
+      min-height: 62px;
+      min-width: 160px;              /* WIDER LEFT LABEL AREA */
+      gap:6px;
+    }
+
+    .ROWHEAD .CODE{
+      font-weight: 950;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .ROWHEAD input{
+      width: 100%;
+      border: 1px solid var(--GRIDLINE);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      outline:none;
+      background: rgba(255,255,255,.95);
+    }
+
+    .CELL{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_MD);
+      background: rgba(255,255,255,.92);
+      min-height: 62px;
+      min-width: 110px;              /* SLIGHTLY WIDER CELLS */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px;
+      position: relative;
+    }
+
+    .CELL.EMPTY{
+      background: rgba(255,255,255,.35);
+      border-style: dashed;
+    }
+
+    .CELL.DIAG{
+      background: rgba(0,0,0,.03);
+      border-color: rgba(0,0,0,.06);
+      font-weight: 900;
+      letter-spacing: 0.03em;
+    }
+
+    .CELL.DECIDE{
+      cursor:pointer;
+      user-select:none;
+      transition: transform .05s ease, box-shadow .05s ease;
+    }
+    .CELL.DECIDE:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0,0,0,.07);
+    }
+
+    .PILL{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: 999px;
+      padding: 3px 10px;
+      background: rgba(0,0,0,.03);
+      font-variant-numeric: tabular-nums;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .PILL .LOWER{
+      font-weight: 950;
+      font-size: 14px;
+    }
+
+    .BAR{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 7px;
+      border-bottom-left-radius: var(--RADIUS_MD);
+      border-bottom-right-radius: var(--RADIUS_MD);
+      background: var(--C_NEUTRAL);
+      opacity: .95;
+    }
+
+    /* ================================
+       ## SCOREBOARD
+       ================================ */
+    .PANEL{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
+      padding: 12px;
+    }
+
+    .PANEL h2{
+      margin: 2px 0 10px;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .TASKLIST{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+
+    .TASKROW{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_MD);
+      background: rgba(255,255,255,.95);
+      padding: 8px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      position: relative;
+      overflow:hidden;
+    }
+
+    .TASKROW.TOP{
+      box-shadow: 0 10px 22px rgba(0,0,0,.09);
+      border-color: rgba(0,0,0,.12);
+    }
+
+    .TASKROW .LEFT{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 0;
+    }
+
+    .TASKROW .LINE1{
+      display:flex;
+      gap:8px;
+      align-items:baseline;
+      flex-wrap:wrap;
+    }
+
+    .TASKROW .CODE{
+      font-weight: 950;
+      letter-spacing: 0.02em;
+    }
+
+    .TASKROW .NAME{
+      color: var(--MUTED);
+      font-size: 12px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 220px;
+    }
+
+    .TASKROW .VOTES{
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    .TASKROW .BAR{
+      height: 6px;
+      opacity: 1;
+    }
+
+    .FOOTNOTE{
+      margin-top: 8px;
+      color: var(--MUTED);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="WRAP">
+    <header>
+      <div class="TITLEBLOCK">
+        <h1>🦄Unicorn Priority Matrix — Jenn's Pairwise Vote Poster</h1>
+        <p>
+          Click a decision cell to cycle: column task → row task → clear. Row headers include a short-name input that feeds the ranked list.
+        </p>
+      </div>
+
+      <div class="FILTERS" id="FILTERS">
+        <div class="GROUP">
+          <label>Actions</label>
+          <button class="BTN PRIMARY" id="RESET">RESET</button>
+          <button class="BTN" id="EXPORT">EXPORT JSON</button>
+          <button class="BTN" id="IMPORT">IMPORT JSON</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="BOARD">
+      <div class="LAYOUT">
+        <div class="MATRIX">
+          <div id="GRID_HOST"></div>
+        </div>
+
+        <aside class="PANEL">
+          <h2>Ranked votes</h2>
+          <div id="SCORE_HOST" class="TASKLIST"></div>
+          <div class="FOOTNOTE">
+            Winner is the highest vote total. Ties are shown as “top” rows as well.
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* ============================================================
+       ## CORE CONSTANTS
+       ============================================================ */
+
+    const COLORS_BY_INDEX = ["var(--C1)","var(--C2)","var(--C3)","var(--C4)","var(--C5)","var(--C6)"];
+
+    /* ============================================================
+       ## STATE (COBOL-ISH)
+       ============================================================ */
+
+    let TASKS = [];                 /* ARRAY OF { CODE, NAME, COLOR } */
+    let DECISIONS_BY_KEY = {};      /* MAP: "ROW|COL" => "A" (WINNER CODE) */
+
+    /* ============================================================
+       ## DOM HOOKS
+       ============================================================ */
+
+    const GRID_HOST = document.getElementById("GRID_HOST");
+    const SCORE_HOST = document.getElementById("SCORE_HOST");
+    const BTN_RESET = document.getElementById("RESET");
+    const BTN_EXPORT = document.getElementById("EXPORT");
+    const BTN_IMPORT = document.getElementById("IMPORT");
+
+    /* ============================================================
+       ## UTILITIES
+       ============================================================ */
+
+    const ESC = (S) => String(S || "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+
+    const GET_TASK_BY_CODE = (CODE) => TASKS.find(T => T.CODE === CODE);
+
+    const MAKE_DECISION_KEY = (ROW_CODE, COL_CODE) => `${ROW_CODE}|${COL_CODE}`;
+
+    const RECOLOR_TASKS = (TASK_LIST) => {
+      return TASK_LIST.map((T, IDX) => ({
+        CODE: T.CODE,
+        NAME: T.NAME,
+        COLOR: COLORS_BY_INDEX[IDX % COLORS_BY_INDEX.length]
+      }));
+    };
+
+    const FILTER_DECISIONS_TO_EXISTING_TASKS = () => {
+      const VALID_CODES = new Set(TASKS.map(T => T.CODE));
+      const NEW_MAP = {};
+      for (const [K, V] of Object.entries(DECISIONS_BY_KEY)) {
+        const [ROW, COL] = K.split("|");
+        if (!VALID_CODES.has(ROW) || !VALID_CODES.has(COL)) continue;
+        if (!VALID_CODES.has(V)) continue;
+        NEW_MAP[K] = V;
+      }
+      DECISIONS_BY_KEY = NEW_MAP;
+    };
+
+    /* ============================================================
+       ## GRID TEMPLATE (NO TOP GUIDE / NO COLUMN HEADERS)
+       ============================================================ */
+
+    const BUILD_GRID_TEMPLATE = (N) => {
+      /* 1 LEFT HEADER COLUMN + N MATRIX COLUMNS */
+      return `160px repeat(${N}, 110px)`;
+    };
+
+    /* ============================================================
+       ## DECISION LOGIC
+       ============================================================ */
+
+    const TOGGLE_DECISION = (ROW_CODE, COL_CODE) => {
+      const KEY = MAKE_DECISION_KEY(ROW_CODE, COL_CODE);
+      const CURRENT = DECISIONS_BY_KEY[KEY] || "";
+
+      let NEXT = "";
+      if (CURRENT === "") NEXT = COL_CODE;
+      else if (CURRENT === COL_CODE) NEXT = ROW_CODE;
+      else if (CURRENT === ROW_CODE) NEXT = "";
+      else NEXT = COL_CODE;
+
+      if (NEXT === "") delete DECISIONS_BY_KEY[KEY];
+      else DECISIONS_BY_KEY[KEY] = NEXT;
+
+      RENDER_MATRIX();
+    };
+
+    /* ============================================================
+       ## VOTES
+       ============================================================ */
+
+    const COMPUTE_VOTES = () => {
+      const VOTES = {};
+      for (const T of TASKS) VOTES[T.CODE] = 0;
+
+      for (const WINNER of Object.values(DECISIONS_BY_KEY)) {
+        if (VOTES.hasOwnProperty(WINNER)) VOTES[WINNER] += 1;
+      }
+      return VOTES;
+    };
+
+    const RENDER_SCOREBOARD = () => {
+      SCORE_HOST.innerHTML = "";
+
+      const VOTES = COMPUTE_VOTES();
+      const SORTED = [...TASKS].sort((A, B) => (VOTES[B.CODE] - VOTES[A.CODE]) || A.CODE.localeCompare(B.CODE));
+      const TOP_VOTES = SORTED.length ? VOTES[SORTED[0].CODE] : 0;
+
+      for (const T of SORTED) {
+        const COUNT = VOTES[T.CODE] || 0;
+        const IS_TOP = (COUNT === TOP_VOTES && TOP_VOTES > 0);
+
+        const ROW = document.createElement("div");
+        ROW.className = "TASKROW" + (IS_TOP ? " TOP" : "");
+
+        ROW.innerHTML = `
+          <div class="LEFT">
+            <div class="LINE1">
+              <span class="CODE" style="color:${T.COLOR}">${ESC(T.CODE)}</span>
+              <span class="NAME">${ESC(T.NAME)}</span>
+            </div>
+          </div>
+          <div class="VOTES">${COUNT}</div>
+          <div class="BAR" style="background:${T.COLOR};"></div>
+        `;
+
+        SCORE_HOST.appendChild(ROW);
+      }
+
+      if (TOP_VOTES === 0) {
+        const NOTE = document.createElement("div");
+        NOTE.className = "FOOTNOTE";
+        NOTE.textContent = "No decisions yet. Click cells in the lower triangle to cast votes.";
+        SCORE_HOST.appendChild(NOTE);
+      }
+    };
+
+    /* ============================================================
+       ## RENDER MATRIX
+       - NO BULLET WHEN EMPTY
+       - NO PARENTHESES AROUND HINT
+       - ROW HEADER INCLUDES INPUT (SHORT NAME)
+       ============================================================ */
+
+    const RENDER_MATRIX = () => {
+      GRID_HOST.innerHTML = "";
+
+      const N = TASKS.length;
+      const GRID = document.createElement("div");
+      GRID.className = "GRID";
+      GRID.style.gridTemplateColumns = BUILD_GRID_TEMPLATE(N);
+      GRID.style.gridAutoRows = "minmax(62px, auto)";
+
+      /* ROWS ONLY (NO TOP HEADER ROW) */
+      for (let R = 0; R < N; R++) {
+        const ROW_TASK = TASKS[R];
+
+        /* LEFT ROW HEADER WITH INPUT */
+        const RH = document.createElement("div");
+        RH.className = "ROWHEAD";
+        RH.innerHTML = `
+          <div class="CODE" style="color:${ROW_TASK.COLOR}">${ESC(ROW_TASK.CODE)}</div>
+          <input
+            type="text"
+            value="${ESC(ROW_TASK.NAME)}"
+            data-code="${ESC(ROW_TASK.CODE)}"
+            placeholder="Short name..."
+            aria-label="Task short name"
+          />
+        `;
+        GRID.appendChild(RH);
+
+        /* MATRIX CELLS */
+        for (let C = 0; C < N; C++) {
+          const COL_TASK = TASKS[C];
+
+          if (C > R) {
+            const CELL = document.createElement("div");
+            CELL.className = "CELL EMPTY";
+            GRID.appendChild(CELL);
+            continue;
+          }
+
+          if (C === R) {
+            const CELL = document.createElement("div");
+            CELL.className = "CELL DIAG";
+            CELL.innerHTML = `
+              <span class="PILL">
+                <span style="color:${ROW_TASK.COLOR}">${ESC(ROW_TASK.CODE)}</span>
+              </span>
+              <div class="BAR" style="background:${ROW_TASK.COLOR}; opacity:.85;"></div>
+            `;
+            GRID.appendChild(CELL);
+            continue;
+          }
+
+          const KEY = MAKE_DECISION_KEY(ROW_TASK.CODE, COL_TASK.CODE);
+          const CURRENT_WINNER = DECISIONS_BY_KEY[KEY] || "";
+
+          const WINNER_TASK = CURRENT_WINNER ? GET_TASK_BY_CODE(CURRENT_WINNER) : null;
+          const WINNER_COLOR = WINNER_TASK ? WINNER_TASK.COLOR : "rgba(0,0,0,.22)";
+
+          /* (1) NO BULLET: blank string when unset */
+          const DISPLAY_LOWER = CURRENT_WINNER ? CURRENT_WINNER.toLowerCase() : "";
+
+          /* (2) NO PARENTHESES: plain hint text */
+          const HINT_TEXT = `${COL_TASK.CODE} vs ${ROW_TASK.CODE}`;
+
+          const CELL = document.createElement("div");
+          CELL.className = "CELL DECIDE";
+          CELL.dataset.key = KEY;
+
+          CELL.innerHTML = `
+            <span class="PILL" title="Click to choose winner">
+              <span class="LOWER" style="color:${WINNER_COLOR}">${ESC(DISPLAY_LOWER)}</span>
+              <span style="color:rgba(0,0,0,.35); font-weight:800;">${ESC(HINT_TEXT)}</span>
+            </span>
+            <div class="BAR" style="background:${WINNER_COLOR};"></div>
+          `;
+
+          CELL.addEventListener("click", () => {
+            TOGGLE_DECISION(ROW_TASK.CODE, COL_TASK.CODE);
+          });
+
+          GRID.appendChild(CELL);
+        }
+      }
+
+      /* VOTE TOTALS ROW */
+      const TOTALS_L = document.createElement("div");
+      TOTALS_L.className = "ROWHEAD";
+      TOTALS_L.innerHTML = `
+        <div class="CODE" style="color:var(--C_NEUTRAL)">VOTES</div>
+        <input type="text" value="Totals" disabled />
+      `;
+      GRID.appendChild(TOTALS_L);
+
+      const VOTES = COMPUTE_VOTES();
+      for (let C = 0; C < N; C++) {
+        const T = TASKS[C];
+        const CELL = document.createElement("div");
+        CELL.className = "CELL";
+        CELL.innerHTML = `
+          <span class="PILL">
+            <span style="color:${T.COLOR}">${ESC(T.CODE)}</span>
+            <span style="color:rgba(0,0,0,.35); font-weight:900;">=</span>
+            <span style="font-weight:950;">${VOTES[T.CODE] || 0}</span>
+          </span>
+          <div class="BAR" style="background:${T.COLOR}; opacity:.85;"></div>
+        `;
+        GRID.appendChild(CELL);
+      }
+
+      GRID_HOST.appendChild(GRID);
+
+      /* WIRE INPUTS: UPDATE TASK NAME LIVE */
+      GRID.querySelectorAll('input[data-code]').forEach(INPUT => {
+        INPUT.addEventListener("input", (EV) => {
+          const CODE = EV.target.getAttribute("data-code");
+          const NEW_NAME = EV.target.value || "";
+          const T = GET_TASK_BY_CODE(CODE);
+          if (!T) return;
+          T.NAME = NEW_NAME.trim();
+          RENDER_SCOREBOARD(); /* UPDATE LIST IMMEDIATELY */
+        });
+      });
+
+      RENDER_SCOREBOARD();
+    };
+
+    /* ============================================================
+       ## RESET / EXPORT / IMPORT
+       ============================================================ */
+
+    const RESET_ALL = () => {
+      DECISIONS_BY_KEY = {};
+      RENDER_MATRIX();
+    };
+
+    const EXPORT_JSON = () => {
+      const PAYLOAD = {
+        TASKS: TASKS.map(T => ({ CODE: T.CODE, NAME: T.NAME })),
+        DECISIONS_BY_KEY
+      };
+
+      const BLOB = new Blob([JSON.stringify(PAYLOAD, null, 2)], { type: "application/json" });
+      const URL = URL.createObjectURL(BLOB);
+
+      const A = document.createElement("a");
+      A.href = URL;
+      A.download = "priority-matrix.json";
+      document.body.appendChild(A);
+      A.click();
+      A.remove();
+
+      URL.revokeObjectURL(URL);
+    };
+
+    const IMPORT_JSON = async () => {
+      const INPUT = document.createElement("input");
+      INPUT.type = "file";
+      INPUT.accept = "application/json";
+
+      INPUT.onchange = async () => {
+        const FILE = INPUT.files && INPUT.files[0];
+        if (!FILE) return;
+
+        const TEXT = await FILE.text();
+        let DATA = null;
+
+        try { DATA = JSON.parse(TEXT); }
+        catch { return; }
+
+        const TASK_LIST = Array.isArray(DATA.TASKS) ? DATA.TASKS : [];
+        const DECISIONS = (DATA.DECISIONS_BY_KEY && typeof DATA.DECISIONS_BY_KEY === "object") ? DATA.DECISIONS_BY_KEY : {};
+
+        const CLEAN_TASKS = TASK_LIST
+          .filter(T => T && typeof T.CODE === "string" && typeof T.NAME === "string")
+          .map(T => ({ CODE: T.CODE.toUpperCase().slice(0,1), NAME: T.NAME.trim() }))
+          .filter(T => /^[A-Z]$/.test(T.CODE));
+
+        if (!CLEAN_TASKS.length) return;
+
+        TASKS = RECOLOR_TASKS(CLEAN_TASKS);
+        DECISIONS_BY_KEY = DECISIONS;
+        FILTER_DECISIONS_TO_EXISTING_TASKS();
+
+        RENDER_MATRIX();
+      };
+
+      INPUT.click();
+    };
+
+    /* ============================================================
+       ## INIT
+       ============================================================ */
+
+    const INIT = () => {
+      TASKS = RECOLOR_TASKS([
+        { CODE:"A", NAME:"Task A" },
+        { CODE:"B", NAME:"Task B" },
+        { CODE:"C", NAME:"Task C" },
+        { CODE:"D", NAME:"Task D" },
+        { CODE:"E", NAME:"Task E" },
+        { CODE:"F", NAME:"Task F" },
+        { CODE:"G", NAME:"Task G" },
+        { CODE:"H", NAME:"Task H" },
+        { CODE:"I", NAME:"Task I" },
+        { CODE:"J", NAME:"Task J" },
+        { CODE:"K", NAME:"Task K" }
+      ]);
+
+      DECISIONS_BY_KEY = {};
+      RENDER_MATRIX();
+    };
+
+    BTN_RESET.addEventListener("click", RESET_ALL);
+    BTN_EXPORT.addEventListener("click", EXPORT_JSON);
+    BTN_IMPORT.addEventListener("click", IMPORT_JSON);
+
+    INIT();
+  </script>
+</body>
+</html>
