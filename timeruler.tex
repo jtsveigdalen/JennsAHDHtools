@@ -1,0 +1,224 @@
+\documentclass[a4paper,portrait]{article}
+\usepackage[margin=1.2cm]{geometry}
+
+% IMPORTANT: richer color names + stable mixing
+\usepackage[dvipsnames,svgnames]{xcolor}
+\usepackage{tikz}
+
+\pagestyle{empty}
+
+% =========================================================
+% CUSTOM COLORS (SAFE + PRINTABLE)
+% =========================================================
+\definecolor{HourPurple}{RGB}{64,0,96}   % dark purple
+\definecolor{HourGreen}{RGB}{0,86,58}    % dark green
+\definecolor{TickPink}{RGB}{200,0,120}   % hot-ish pink
+\definecolor{TickLime}{RGB}{90,180,0}    % lime-ish green
+
+\begin{document}
+
+% =========================================================
+% CONFIG — PORTRAIT TUNING
+% =========================================================
+\newcommand{\WorkStart}{6}       % detailed window start hour
+\newcommand{\WorkEnd}{18}        % detailed window end hour (inclusive label at 18)
+\newcommand{\DayEnd}{23}         % last hour label shown anywhere
+
+\newcommand{\HourHeight}{1.85}   % cm per hour in the MAIN panel (portrait)
+
+\newcommand{\AxisX}{0}           % x-position of the vertical spine for main panel
+\newcommand{\MainW}{12.6}        % cm width of writing area for main panel (portrait)
+\renewcommand{\NotesW}{3.9}
+\renewcommand{\GapW}{0.4}
+
+\newcommand{\TickLenMajor}{1.0}  % cm hour tick length into page
+\newcommand{\TickLenMinor}{0.55} % cm minor tick length into page
+\newcommand{\TickLenHalf}{1.95}  % cm HALF-HOUR tick length (big anchor)
+
+% Mini strip (after-hours) sizing
+\newcommand{\MiniHourHeight}{0.60} % cm per hour in mini strip
+\newcommand{\MiniW}{12.6}          % cm width of mini strip (match main)
+
+\begin{tikzpicture}[x=1cm,y=1cm,yscale=-1] % y grows downward
+
+  % -----------------------------
+  % Derived numeric values (loop bounds MUST be integers)
+  % -----------------------------
+  \pgfmathtruncatemacro{\WorkHoursInt}{\WorkEnd-\WorkStart}
+  \pgfmathsetmacro{\MainH}{\WorkHoursInt*\HourHeight}
+  \pgfmathsetmacro{\NotesX}{\AxisX+\MainW+\GapW}
+
+  \pgfmathsetmacro{\MiniTop}{\MainH + 0.9}
+  \pgfmathtruncatemacro{\MiniHoursInt}{\DayEnd-\WorkEnd}
+  \pgfmathsetmacro{\MiniH}{\MiniHoursInt*\MiniHourHeight}
+
+  % -----------------------------
+  % Styles (NO UNDEFINED COLOR NAMES)
+  % -----------------------------
+  \tikzset{
+    tenthline/.style={gray!15, dotted, line width=0.25pt},
+    hourlineA/.style={draw=HourPurple, solid, line width=1.05pt},
+    hourlineB/.style={draw=HourGreen,  solid, line width=1.05pt},
+    halfline/.style={draw=black!55, dashed, line width=0.55pt},
+
+    spine/.style={black, line width=0.90pt},
+    tickmajor/.style={black, line width=0.80pt},
+
+    tickA/.style={draw=TickPink, line width=0.65pt},
+    tickB/.style={draw=TickLime, line width=0.65pt},
+    tickhalf/.style={draw=black, line width=1.05pt},
+
+    hourlabel/.style={font=\large},
+    box/.style={draw=black, rounded corners=1.5mm, line width=0.6pt},
+    heading/.style={font=\bfseries}
+  }
+
+  % =========================================================
+  % MAIN PANEL: WORK WINDOW (06–18) WITH TENTHS + WRITING ROOM
+  % =========================================================
+
+  % Spine
+  \draw[spine] (\AxisX,0) -- (\AxisX,\MainH);
+
+  % Hour lines + tenth lines (with half-hour emphasis at t=5)
+  \foreach \h in {0,...,\WorkHoursInt} {
+    \pgfmathsetmacro{\Yhour}{\h*\HourHeight}
+
+    \pgfmathtruncatemacro{\HourParity}{mod(\h,2)}
+    \ifnum\HourParity=0
+      \draw[hourlineA] (\AxisX,\Yhour) -- (\AxisX+\MainW,\Yhour);
+    \else
+      \draw[hourlineB] (\AxisX,\Yhour) -- (\AxisX+\MainW,\Yhour);
+    \fi
+
+    \ifnum\h<\WorkHoursInt
+      \foreach \t in {1,...,9} {
+        \pgfmathsetmacro{\Yt}{\Yhour+(\t/10.0)*\HourHeight}
+        \ifnum\t=5
+          \draw[halfline] (\AxisX,\Yt) -- (\AxisX+\MainW,\Yt);
+        \else
+          \draw[tenthline] (\AxisX,\Yt) -- (\AxisX+\MainW,\Yt);
+        \fi
+      }
+    \fi
+  }
+
+  % Hour ticks + labels + colored minor ticks
+  \foreach \H in {\WorkStart,...,\WorkEnd} {
+    \pgfmathsetmacro{\i}{\H-\WorkStart}
+    \pgfmathsetmacro{\Y}{\i*\HourHeight}
+
+    \draw[tickmajor] (\AxisX,\Y) -- (\AxisX+\TickLenMajor,\Y);
+    \node[hourlabel, anchor=east] at (\AxisX-0.5,\Y) {\H};
+
+    \ifnum\H<\WorkEnd
+      \foreach \t in {1,...,9} {
+        \pgfmathsetmacro{\Yminor}{\Y+(\t/10.0)*\HourHeight}
+
+        \ifnum\t=5
+          % half-hour marker: long + bold
+          \draw[tickhalf] (\AxisX,\Yminor) -- (\AxisX+\TickLenHalf,\Yminor);
+        \else
+          % alternate tick colors for easy counting
+          \pgfmathtruncatemacro{\Parity}{mod(\t,2)}
+          \ifnum\Parity=0
+            \draw[tickA] (\AxisX,\Yminor) -- (\AxisX+\TickLenMinor,\Yminor);
+          \else
+            \draw[tickB] (\AxisX,\Yminor) -- (\AxisX+\TickLenMinor,\Yminor);
+          \fi
+        \fi
+      }
+    \fi
+  }
+
+  % =========================================================
+  % HEADER + NOTES COLUMN
+  % =========================================================
+
+  \draw[box] (\NotesX,0) rectangle ++(\NotesW,2.1);
+  \node[anchor=west] at (\NotesX+0.3,0.7) {\textbf{Date:} \hspace{2.6cm}};
+
+  \node[anchor=west] at (\NotesX+0.3,1.55)
+    {\shortstack[l]{\textbf{Work:} 06:00--18:00\\[2pt]\textbf{Unit:} tenths}};
+
+  % Main notes box
+  \draw[box] (\NotesX,2.4) rectangle ++(\NotesW,\MainH-2.4);
+
+  % Heading
+  \node[heading, anchor=west] at (\NotesX+0.3,2.9)
+    {\shortstack[l]{Prioritize\\By Energy}};\\
+    \\
+
+%  % Legend (right box) — two rows + separator
+%  \node[anchor=west] at (\NotesX+0.3,3.75)
+%    {\shortstack[l]{\ttfamily\small
+%      06\ \ 12\ \ 18\ \ 24\ \ 30\\
+%      ----------------------------\\
+%      36\ \ 42\ \ 48\ \ 54\ \ 00
+%    }};
+
+    % Fixed-width legend block (monospace + fixed text box)
+\node[anchor=west] at (\NotesX+0.3, {3.75 + 0.25}) {%
+  \begin{minipage}[t]{3.0cm} % <-- adjust width to taste
+    \ttfamily\small
+    \centering
+    06\ \ 12\ \ 18\ \ 24\ \ 30\\
+    \rule{3.2cm}{0.3pt}\\ % <-- same as minipage width
+    36\ \ 42\ \ 48\ \ 54\ \ 00
+  \end{minipage}%
+};
+
+  % ---- 4 sections inside notes box ----
+  \pgfmathsetmacro{\NotesInnerTop}{5.00}        % start below legend
+  \pgfmathsetmacro{\NotesInnerBot}{\MainH-0.35} % small bottom padding
+  \pgfmathsetmacro{\SectionH}{(\NotesInnerBot-\NotesInnerTop)/4.0}
+
+  % Section separators + labels
+  \foreach \s/\label in {0/BORING MAINT,1/CREATIVE,2/URGENT,3/EXTERNAL} {
+    \pgfmathsetmacro{\Ys}{\NotesInnerTop + \s*\SectionH}
+
+    % label
+    \node[heading, anchor=west] at (\NotesX+0.3,\Ys+0.35) {\label};
+
+    % separator line at the top of each section (except first)
+    \ifnum\s>0
+      \draw[black!30, line width=0.5pt] (\NotesX+0.25,\Ys) -- (\NotesX+\NotesW-0.25,\Ys);
+    \fi
+  }
+
+  % Dotted writing lines across the full notes area (kept light)
+  \foreach \k in {0,...,40} {
+    \pgfmathsetmacro{\yn}{\NotesInnerTop + 0.95 + 0.65*\k}
+    \ifdim \yn pt < \NotesInnerBot pt
+      \draw[gray!20, dotted, line width=0.25pt] (\NotesX+0.3,\yn) -- (\NotesX+\NotesW-0.3,\yn);
+    \fi
+  }
+
+  % =========================================================
+  % MINI STRIP: 18–23 (COMPACT)
+  % =========================================================
+
+  \draw[spine] (\AxisX,\MiniTop) -- (\AxisX,\MiniTop+\MiniH);
+
+  \foreach \h in {0,...,\MiniHoursInt} {
+    \pgfmathsetmacro{\Y}{\MiniTop + \h*\MiniHourHeight}
+    \pgfmathtruncatemacro{\HourParity}{mod(\h,2)}
+    \ifnum\HourParity=0
+      \draw[hourlineA] (\AxisX,\Y) -- (\AxisX+\MiniW,\Y);
+    \else
+      \draw[hourlineB] (\AxisX,\Y) -- (\AxisX+\MiniW,\Y);
+    \fi
+  }
+
+  \foreach \H in {\WorkEnd,...,\DayEnd} {
+    \pgfmathsetmacro{\i}{\H-\WorkEnd}
+    \pgfmathsetmacro{\Y}{\MiniTop + \i*\MiniHourHeight}
+    \draw[tickmajor] (\AxisX,\Y) -- (\AxisX+\TickLenMajor,\Y);
+    \node[anchor=east] at (\AxisX-0.5,\Y) {\H};
+  }
+
+  \node[heading, anchor=west] at (\AxisX,\MiniTop-0.35) {After-hours (compact): 18:00--23:00};
+
+\end{tikzpicture}
+
+\end{document}
