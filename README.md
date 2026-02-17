@@ -2,7 +2,7 @@
 
 Small browser-based tools that help me wrangle my brain when ADHD chaos mode is active.
 
-## Current tool (more might appear if I stay on task)
+## Current tools (more might appear if I stay on task)
 
 ### `prioritymatrix.html`
 A single-file **pairwise priority matrix** for figuring out what to do first without overthinking it for 45 minutes.
@@ -13,17 +13,26 @@ A single-file **pairwise priority matrix** for figuring out what to do first wit
 - Reset all decisions with **RESET**
 - Save/load your board with **EXPORT JSON** / **IMPORT JSON**
 
+### `certposter.html`
+A certification matrix poster with filters and search so you can quickly scan cert options.
+
+### `timeruler.tex`
+A tiny printed guide to help prioritize and track time in 6-minute increments (tenths of an hour), especially useful for consulting time tracking.
+
+This one is partly based on Ruri Ohama's method of prioritization. Check her out: https://www.youtube.com/c/RuriOhama
+
 ## Quick start
 
 No build step and no dependencies are required.
 
 1. Clone this repo
-2. Open `prioritymatrix.html` in a browser
+2. Open `prioritymatrix.html` or `certposter.html` in a browser
+3. Edit/build `timeruler.tex` in your preferred LaTeX workflow
 
 Optional (local server):
 
 - Python: `python -m http.server`
-- Then open `http://localhost:8000/prioritymatrix.html`
+- Then open `http://localhost:8000/prioritymatrix.html` or `http://localhost:8000/certposter.html`
 
 ## Project status
 

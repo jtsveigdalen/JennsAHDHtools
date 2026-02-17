@@ -8,11 +8,14 @@
       /* ============================================================        ## 🦄 VISUAL THEME / TOKENS        ============================================================ */
       :root {
         --BG: #f6f5f2;
+        --BG_TOP: #fbfaf7;
         --PANEL: #ffffff;
         --INK: #1b1b1b;
         --MUTED: #6b6b6b;
         --GRIDLINE: rgba(0, 0, 0, 0.08);
         --SHADOW: 0 10px 25px rgba(0, 0, 0, 0.08);
+        --ROWHEAD_INK: #3b3b3b;
+        --PILL_INK: #3f3f3f;
         --RADIUS_LG: 18px;
         --RADIUS_MD: 12px; /* ============================================================          ## 🎨 PREFIX / COLOR MAPPING          ============================================================ */
         --C_AZURE: #2b6cff; /* AZ + DP => BLUE */
@@ -23,6 +26,19 @@
         --C_MS: #1a8f4e; /* MS => GREEN */ /* FAMILY OVERRIDES */
         --C_BUSINESS: #111111; /* MS BUS => BLACK */ /* FALLBACK */
         --C_NEUTRAL: #111111;
+      }
+
+      :root[data-theme="darker"] {
+        --BG: #2b313b;
+        --BG_TOP: #3a4350;
+        --PANEL: #313947;
+        --INK: #eef3fa;
+        --MUTED: #c7d2e0;
+        --GRIDLINE: rgba(255, 255, 255, 0.16);
+        --SHADOW: 0 10px 25px rgba(0, 0, 0, 0.35);
+        --ROWHEAD_INK: #d6e0ec;
+        --PILL_INK: #d6e0ec;
+        --C_NEUTRAL: #dce6f4;
       }
       * {
         box-sizing: border-box;
@@ -40,7 +56,25 @@
           "Apple Color Emoji",
           "Segoe UI Emoji";
         color: var(--INK);
-        background: linear-gradient(#fbfaf7, var(--BG));
+        background: linear-gradient(var(--BG_TOP), var(--BG));
+      }
+
+      :root[data-theme="darker"] .FILTERS,
+      :root[data-theme="darker"] .BOARD,
+      :root[data-theme="darker"] .COLHEAD,
+      :root[data-theme="darker"] .ROWHEAD,
+      :root[data-theme="darker"] .CELL,
+      :root[data-theme="darker"] .CARD {
+        background: rgba(18, 23, 31, 0.74);
+      }
+
+      :root[data-theme="darker"] .SEARCH,
+      :root[data-theme="darker"] .CHIP,
+      :root[data-theme="darker"] .BTN,
+      :root[data-theme="darker"] .PILL,
+      :root[data-theme="darker"] .SEARCH input {
+        color: var(--INK);
+        background: rgba(31, 37, 47, 0.88);
       }
       .WRAP {
         max-width: 1200px;
@@ -183,7 +217,7 @@
         font-weight: 800;
         letter-spacing: 0.03em;
         font-size: 12px;
-        color: #3b3b3b;
+        color: var(--ROWHEAD_INK);
       }
       .CELL {
         background: rgba(255, 255, 255, 0.72);
@@ -234,7 +268,7 @@
         border-radius: 999px;
         padding: 2px 8px;
         background: rgba(0, 0, 0, 0.03);
-        color: #3f3f3f;
+        color: var(--PILL_INK);
         display: inline-flex;
         gap: 4px;
         align-items: center;
@@ -395,6 +429,7 @@
                 placeholder="Search: code (SC-300), title, keywords…"
               />
             </div>
+            <button class="BTN" id="DARKER_TOGGLE" type="button">DARKER MODE</button>
             <button class="BTN PRIMARY" id="GO" type="button">Go/Resize</button>
             <button class="BTN" id="RESET" type="button">RESET</button>
           </div>
@@ -870,6 +905,29 @@
       const Q_EL = document.getElementById("Q");
       const GO_BTN = document.getElementById("GO");
       const RESET_BTN = document.getElementById("RESET");
+      const BTN_DARKER = document.getElementById("DARKER_TOGGLE");
+
+      const THEME_KEY = "cert-poster-theme";
+
+      const APPLY_THEME = (THEME) => {
+        const USE_DARKER = THEME === "darker";
+        if (USE_DARKER)
+          document.documentElement.setAttribute("data-theme", "darker");
+        else document.documentElement.removeAttribute("data-theme");
+
+        if (BTN_DARKER)
+          BTN_DARKER.textContent = USE_DARKER ? "LIGHTER MODE" : "DARKER MODE";
+
+        try {
+          localStorage.setItem(THEME_KEY, USE_DARKER ? "darker" : "light");
+        } catch {}
+      };
+
+      const TOGGLE_THEME = () => {
+        const IS_DARKER =
+          document.documentElement.getAttribute("data-theme") === "darker";
+        APPLY_THEME(IS_DARKER ? "light" : "darker");
+      };
       /* ============================================================        ## PREFIX GROUPS        ============================================================ */ const PREFIX_GROUPS =
         {
           AZURE: ["AZ", "DP"],
@@ -1012,6 +1070,16 @@
       };
       GO_BTN.addEventListener("click", APPLY_ALL);
       RESET_BTN.addEventListener("click", RESET_ALL);
+
+      try {
+        const SAVED_THEME = localStorage.getItem(THEME_KEY);
+        APPLY_THEME(SAVED_THEME === "darker" ? "darker" : "light");
+      } catch {
+        APPLY_THEME("light");
+      }
+
+      BTN_DARKER.addEventListener("click", TOGGLE_THEME);
+
       APPLY_ALL();
     </script>
   </body>

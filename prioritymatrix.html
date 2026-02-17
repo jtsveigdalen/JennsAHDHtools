@@ -8,11 +8,15 @@
   <style>
     :root{
       --BG: #f6f5f2;
+      --BG_TOP: #fbfaf7;
       --PANEL: #ffffff;
       --INK: #1b1b1b;
       --MUTED: #6b6b6b;
       --GRIDLINE: rgba(0,0,0,.08);
       --SHADOW: 0 10px 25px rgba(0,0,0,.08);
+      --DIAG_BG: rgba(0,0,0,.03);
+      --EMPTY_BG: rgba(255,255,255,.35);
+      --HINT: rgba(0,0,0,.35);
 
       --RADIUS_LG: 18px;
       --RADIUS_MD: 12px;
@@ -27,13 +31,44 @@
       --C_NEUTRAL: #111111;
     }
 
+    :root[data-theme="darker"]{
+      --BG: #2b313b;
+      --BG_TOP: #3a4350;
+      --PANEL: #313947;
+      --INK: #eef3fa;
+      --MUTED: #c7d2e0;
+      --GRIDLINE: rgba(255,255,255,.16);
+      --SHADOW: 0 10px 25px rgba(0,0,0,.35);
+      --DIAG_BG: rgba(255,255,255,.12);
+      --EMPTY_BG: rgba(255,255,255,.08);
+      --HINT: rgba(231,240,252,.72);
+      --C_NEUTRAL: #dce6f4;
+    }
+
     *{ box-sizing:border-box; }
 
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       color:var(--INK);
-      background:linear-gradient(#fbfaf7, var(--BG));
+      background:linear-gradient(var(--BG_TOP), var(--BG));
+    }
+
+    :root[data-theme="darker"] .FILTERS,
+    :root[data-theme="darker"] .BOARD,
+    :root[data-theme="darker"] .MATRIX,
+    :root[data-theme="darker"] .PANEL,
+    :root[data-theme="darker"] .ROWHEAD,
+    :root[data-theme="darker"] .CELL,
+    :root[data-theme="darker"] .TASKROW{
+      background: rgba(18,23,31,.74);
+    }
+
+    :root[data-theme="darker"] input,
+    :root[data-theme="darker"] .PILL,
+    :root[data-theme="darker"] .BTN{
+      color: var(--INK);
+      background: rgba(31,37,47,.88);
     }
 
     .WRAP{
@@ -195,12 +230,12 @@
     }
 
     .CELL.EMPTY{
-      background: rgba(255,255,255,.35);
+      background: var(--EMPTY_BG);
       border-style: dashed;
     }
 
     .CELL.DIAG{
-      background: rgba(0,0,0,.03);
+      background: var(--DIAG_BG);
       border-color: rgba(0,0,0,.06);
       font-weight: 900;
       letter-spacing: 0.03em;
@@ -348,6 +383,7 @@
       <div class="FILTERS" id="FILTERS">
         <div class="GROUP">
           <label>Actions</label>
+          <button class="BTN" id="DARKER_TOGGLE">DARKER MODE</button>
           <button class="BTN PRIMARY" id="RESET">RESET</button>
           <button class="BTN" id="EXPORT">EXPORT JSON</button>
           <button class="BTN" id="IMPORT">IMPORT JSON</button>
@@ -395,6 +431,25 @@
     const BTN_RESET = document.getElementById("RESET");
     const BTN_EXPORT = document.getElementById("EXPORT");
     const BTN_IMPORT = document.getElementById("IMPORT");
+    const BTN_DARKER = document.getElementById("DARKER_TOGGLE");
+
+    const THEME_KEY = "priority-matrix-theme";
+
+    const APPLY_THEME = (THEME) => {
+      const USE_DARKER = THEME === "darker";
+      if (USE_DARKER) document.documentElement.setAttribute("data-theme", "darker");
+      else document.documentElement.removeAttribute("data-theme");
+
+      if (BTN_DARKER) BTN_DARKER.textContent = USE_DARKER ? "LIGHTER MODE" : "DARKER MODE";
+
+      try { localStorage.setItem(THEME_KEY, USE_DARKER ? "darker" : "light"); }
+      catch {}
+    };
+
+    const TOGGLE_THEME = () => {
+      const IS_DARKER = document.documentElement.getAttribute("data-theme") === "darker";
+      APPLY_THEME(IS_DARKER ? "light" : "darker");
+    };
 
     /* ============================================================
        ## UTILITIES
@@ -584,7 +639,7 @@
           CELL.innerHTML = `
             <span class="PILL" title="Click to choose winner">
               <span class="LOWER" style="color:${WINNER_COLOR}">${ESC(DISPLAY_LOWER)}</span>
-              <span style="color:rgba(0,0,0,.35); font-weight:800;">${ESC(HINT_TEXT)}</span>
+              <span style="color:var(--HINT); font-weight:800;">${ESC(HINT_TEXT)}</span>
             </span>
             <div class="BAR" style="background:${WINNER_COLOR};"></div>
           `;
@@ -614,7 +669,7 @@
         CELL.innerHTML = `
           <span class="PILL">
             <span style="color:${T.COLOR}">${ESC(T.CODE)}</span>
-            <span style="color:rgba(0,0,0,.35); font-weight:900;">=</span>
+            <span style="color:var(--HINT); font-weight:900;">=</span>
             <span style="font-weight:950;">${VOTES[T.CODE] || 0}</span>
           </span>
           <div class="BAR" style="background:${T.COLOR}; opacity:.85;"></div>
@@ -728,6 +783,15 @@
     BTN_RESET.addEventListener("click", RESET_ALL);
     BTN_EXPORT.addEventListener("click", EXPORT_JSON);
     BTN_IMPORT.addEventListener("click", IMPORT_JSON);
+
+    try {
+      const SAVED_THEME = localStorage.getItem(THEME_KEY);
+      APPLY_THEME(SAVED_THEME === "darker" ? "darker" : "light");
+    } catch {
+      APPLY_THEME("light");
+    }
+
+    BTN_DARKER.addEventListener("click", TOGGLE_THEME);
 
     INIT();
   </script>
