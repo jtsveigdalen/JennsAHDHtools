@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en" data-theme="darker">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🦄 1:22 Time Ladder — 5 Periods</title>
+
+  <style>
+    :root{
+      --BG: #f6f5f2;
+      --BG_TOP: #fbfaf7;
+      --PANEL: #ffffff;
+      --INK: #1b1b1b;
+      --MUTED: #6b6b6b;
+      --GRIDLINE: rgba(0,0,0,.08);
+      --SHADOW: 0 10px 25px rgba(0,0,0,.08);
+      --EMPTY_BG: rgba(255,255,255,.35);
+      --HINT: rgba(0,0,0,.35);
+
+      --RADIUS_LG: 18px;
+      --RADIUS_MD: 12px;
+
+      --C1: #2b6cff;
+      --C2: #ff2fb3;
+      --C3: #7a4bd1;
+      --C4: #ff7a1a;
+      --C5: #d6a400;
+      --C6: #1a8f4e;
+
+      --C_NEUTRAL: #111111;
+    }
+
+    :root[data-theme="darker"]{
+      --BG: #2b313b;
+      --BG_TOP: #3a4350;
+      --PANEL: #313947;
+      --INK: #eef3fa;
+      --MUTED: #c7d2e0;
+      --GRIDLINE: rgba(255,255,255,.16);
+      --SHADOW: 0 10px 25px rgba(0,0,0,.35);
+      --EMPTY_BG: rgba(255,255,255,.08);
+      --HINT: rgba(231,240,252,.72);
+      --C_NEUTRAL: #dce6f4;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--INK);
+      background:linear-gradient(var(--BG_TOP), var(--BG));
+    }
+
+    :root[data-theme="darker"] .FILTERS,
+    :root[data-theme="darker"] .BOARD,
+    :root[data-theme="darker"] .PANEL,
+    :root[data-theme="darker"] .ROW{
+      background: rgba(18,23,31,.74);
+    }
+
+    :root[data-theme="darker"] input,
+    :root[data-theme="darker"] .PILL,
+    :root[data-theme="darker"] .BTN{
+      color: var(--INK);
+      background: rgba(31,37,47,.88);
+    }
+
+    .WRAP{
+      max-width: 1200px;
+      margin: 24px auto 40px;
+      padding: 0 18px;
+    }
+
+    header{
+      display:flex;
+      gap:16px;
+      align-items:flex-end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+
+    .TITLEBLOCK h1{
+      margin:0;
+      font-size: 28px;
+      letter-spacing:-0.02em;
+    }
+
+    .TITLEBLOCK p{
+      margin:6px 0 0;
+      color:var(--MUTED);
+      max-width: 90ch;
+      line-height: 1.35;
+    }
+
+    .FILTERS{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:center;
+      background: rgba(255,255,255,.65);
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      padding: 10px 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+
+    .GROUP{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      padding-right: 10px;
+      border-right: 1px solid var(--GRIDLINE);
+    }
+    .GROUP:last-child{ border-right:none; padding-right:0; }
+
+    label{
+      font-size: 12px;
+      color: var(--MUTED);
+      margin-right: 2px;
+      user-select:none;
+    }
+
+    .BTN{
+      border:1px solid var(--GRIDLINE);
+      background: var(--PANEL);
+      border-radius: 999px;
+      padding: 7px 12px;
+      cursor:pointer;
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: 0.01em;
+      position:relative;
+    }
+    .BTN:hover{ filter: brightness(0.98); }
+
+    .BTN.PRIMARY{
+      border-color: rgba(0,0,0,.20);
+      box-shadow: 0 6px 14px rgba(0,0,0,.10);
+      outline: 2px solid rgba(255,255,255,.14);
+      outline-offset: 2px;
+    }
+
+    /* ============================================================
+       ## 🦄 PILL INPUTS (MATCH THE PILL VIBE)
+       ============================================================ */
+
+    .PILLINPUT{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      outline:none;
+      background: rgba(255,255,255,.95);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .02em;
+      height: 34px;
+      line-height: 34px;
+    }
+    :root[data-theme="darker"] .PILLINPUT{
+      background: rgba(31,37,47,.88);
+    }
+
+    .STEPBOX{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .STEPBOX label{ opacity:.75; }
+    .STEPBOX input{
+      width: 86px;
+      min-width: 86px;
+      text-align:center;
+      opacity:.92;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    /* ============================================================
+       ## BOARD / RESULTS — SMALLER + LEFT-ALIGNED ON DESKTOP
+       ============================================================ */
+
+    .BOARD{
+      margin-top: 14px;
+      /* keep the board style, but don't let it span huge visually */
+      background: rgba(255,255,255,.55);
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      padding: 14px;
+      box-shadow: var(--SHADOW);
+
+      /* key part: don't force a giant wide results area */
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .PANEL{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_LG);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
+      padding: 12px;
+
+      /* desktop sizing: align nicely with header area */
+      width: min(760px, 100%);
+    }
+
+    .PANEL h2{
+      margin: 2px 0 10px;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .ROWS{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+
+    .ROW{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: var(--RADIUS_MD);
+      background: rgba(255,255,255,.95);
+      padding: 10px 10px;
+      position: relative;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .ROW .LEFT{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 0;
+    }
+
+    .ROW .LINE1{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      flex-wrap:wrap;
+    }
+
+    .PILL{
+      border: 1px solid var(--GRIDLINE);
+      border-radius: 999px;
+      padding: 3px 10px;
+      background: rgba(0,0,0,.03);
+      font-variant-numeric: tabular-nums;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .ROW .LABEL{
+      color: var(--MUTED);
+      font-size: 12px;
+    }
+
+    .ROW .BIG{
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+      font-size: 16px;
+    }
+
+    .BAR{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 6px;
+      border-bottom-left-radius: var(--RADIUS_MD);
+      border-bottom-right-radius: var(--RADIUS_MD);
+      opacity: .95;
+    }
+
+    .FOOTNOTE{
+      margin-top: 8px;
+      color:var(--MUTED);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .KBD{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--GRIDLINE);
+      background: rgba(0,0,0,.06);
+      color: var(--INK);
+    }
+
+    /* ============================================================
+       ## ✨ GENERATE "FLASHBULB STAR" BURST (AT 10s)
+       ============================================================ */
+
+    .BTN .STAR{
+      position:absolute;
+      top:-10px;
+      right:-10px;
+      width: 26px;
+      height: 26px;
+      pointer-events:none;
+      opacity:0;
+      transform: scale(.2) rotate(-10deg);
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));
+    }
+
+    .BTN .STAR svg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    @keyframes starBurst {
+      0%   { opacity:0; transform: translate(0,0) scale(.15) rotate(-10deg); }
+      15%  { opacity:1; transform: translate(-2px,1px) scale(1.15) rotate(14deg); }
+      45%  { opacity:1; transform: translate(-1px,0) scale(1.00) rotate(22deg); }
+      100% { opacity:0; transform: translate(4px,-2px) scale(1.8) rotate(55deg); }
+    }
+
+    .BTN.BURST .STAR{
+      animation: starBurst 650ms ease-out 0s 1;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .BTN.BURST .STAR{ animation:none; opacity:0; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="WRAP">
+    <header>
+      <div class="TITLEBLOCK">
+        <h1>🦄 1:22 Time Ladder</h1>
+        <p>
+          Pick <span class="KBD">Now</span> or enter a base time, then generate the next 5 periods (24-hour time).
+          Step defaults to <span class="KBD">01:22</span>.
+        </p>
+      </div>
+
+      <div class="FILTERS">
+        <div class="GROUP">
+          <label>Base time</label>
+          <input id="BASE_TIME" class="PILLINPUT" type="time" step="60" aria-label="Base time (24-hour)" />
+          <button class="BTN PRIMARY" id="USE_NOW">USE NOW</button>
+        </div>
+
+        <div class="GROUP">
+          <div class="STEPBOX">
+            <label>Step</label>
+            <input id="STEP" class="PILLINPUT" type="text" value="01:22" inputmode="numeric" aria-label="Step duration (HH:MM)" />
+          </div>
+        </div>
+
+        <div class="GROUP">
+          <label>Actions</label>
+          <button class="BTN" id="DARKER_TOGGLE">LIGHTER MODE</button>
+
+          <button class="BTN PRIMARY" id="GENERATE">
+            GENERATE
+            <span class="STAR" aria-hidden="true">
+              <!-- tiny "flashbulb star" svg -->
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32 4l6.2 16.6L55 26l-16.8 5.4L32 58l-6.2-26.6L9 26l16.8-5.4L32 4z"
+                      fill="currentColor" opacity="0.92"/>
+                <path d="M32 10l4.6 12.2L49 26l-12.4 3.8L32 54l-4.6-24.2L15 26l12.4-3.8L32 10z"
+                      fill="white" opacity="0.18"/>
+              </svg>
+            </span>
+          </button>
+
+          <button class="BTN" id="COPY">COPY</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="BOARD">
+      <div class="PANEL">
+        <h2>Next 5 periods</h2>
+        <div id="ROWS" class="ROWS"></div>
+        <div class="FOOTNOTE" id="NOTE"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* ============================================================
+       ## CORE CONSTANTS
+       ============================================================ */
+
+    const COUNT = 5;
+    const COLORS = ["var(--C1)","var(--C2)","var(--C3)","var(--C4)","var(--C5)"];
+
+    const THEME_KEY = "time-ladder-theme";
+    const STEP_KEY  = "time-ladder-step";
+
+    /* ============================================================
+       ## DOM HOOKS
+       ============================================================ */
+
+    const EL_BASE = document.getElementById("BASE_TIME");
+    const EL_STEP = document.getElementById("STEP");
+    const EL_ROWS = document.getElementById("ROWS");
+    const EL_NOTE = document.getElementById("NOTE");
+
+    const BTN_NOW = document.getElementById("USE_NOW");
+    const BTN_GEN = document.getElementById("GENERATE");
+    const BTN_COPY = document.getElementById("COPY");
+    const BTN_DARKER = document.getElementById("DARKER_TOGGLE");
+
+    /* ============================================================
+       ## THEME
+       ============================================================ */
+
+    const APPLY_THEME = (THEME) => {
+      const USE_DARKER = THEME === "darker";
+      if (USE_DARKER) document.documentElement.setAttribute("data-theme", "darker");
+      else document.documentElement.removeAttribute("data-theme");
+
+      BTN_DARKER.textContent = USE_DARKER ? "LIGHTER MODE" : "DARKER MODE";
+
+      try { localStorage.setItem(THEME_KEY, USE_DARKER ? "darker" : "light"); }
+      catch {}
+    };
+
+    const TOGGLE_THEME = () => {
+      const IS_DARKER = document.documentElement.getAttribute("data-theme") === "darker";
+      APPLY_THEME(IS_DARKER ? "light" : "darker");
+    };
+
+    /* ============================================================
+       ## UTILITIES
+       ============================================================ */
+
+    const PAD2 = (N) => String(N).padStart(2, "0");
+
+    const FORMAT_HHMM = (TOTAL_MINUTES) => {
+      const M = ((TOTAL_MINUTES % 1440) + 1440) % 1440;
+      const HH = Math.floor(M / 60);
+      const MM = M % 60;
+      return `${PAD2(HH)}:${PAD2(MM)}`;
+    };
+
+    const PARSE_TIME_INPUT = (HHMM) => {
+      if (!HHMM || typeof HHMM !== "string") return null;
+      const M = HHMM.match(/^(\d{2}):(\d{2})$/);
+      if (!M) return null;
+
+      const HH = Number(M[1]);
+      const MM = Number(M[2]);
+
+      if (Number.isNaN(HH) || Number.isNaN(MM)) return null;
+      if (HH < 0 || HH > 23) return null;
+      if (MM < 0 || MM > 59) return null;
+
+      return (HH * 60) + MM;
+    };
+
+    const NOW_MINUTES = () => {
+      const D = new Date();
+      return (D.getHours() * 60) + D.getMinutes();
+    };
+
+    const SET_BASE_TO_NOW = () => {
+      const D = new Date();
+      EL_BASE.value = `${PAD2(D.getHours())}:${PAD2(D.getMinutes())}`;
+    };
+
+    /* Step parsing: accepts "H:MM" or "HH:MM" */
+    const PARSE_STEP = (S) => {
+      const RAW = String(S || "").trim();
+      const M = RAW.match(/^(\d{1,2}):(\d{2})$/);
+      if (!M) return null;
+
+      const H = Number(M[1]);
+      const MM = Number(M[2]);
+
+      if (Number.isNaN(H) || Number.isNaN(MM)) return null;
+      if (H < 0 || H > 23) return null;
+      if (MM < 0 || MM > 59) return null;
+
+      const TOTAL = (H * 60) + MM;
+      if (TOTAL <= 0) return null;
+
+      return { MINUTES: TOTAL, DISPLAY: `${PAD2(H)}:${PAD2(MM)}` };
+    };
+
+    const GET_STEP = () => {
+      const PARSED = PARSE_STEP(EL_STEP.value);
+      if (!PARSED) return { MINUTES: 82, DISPLAY: "01:22" };
+      return PARSED;
+    };
+
+    const BUILD_PERIODS = (BASE_MINUTES, STEP_MINUTES) => {
+      const OUT = [];
+      for (let I = 1; I <= COUNT; I++) {
+        const T = BASE_MINUTES + (I * STEP_MINUTES);
+        OUT.push({ INDEX: I, MINUTES: T, HHMM: FORMAT_HHMM(T) });
+      }
+      return OUT;
+    };
+
+    /* ============================================================
+       ## ✨ STAR BURST (ONE-SHOT AT 10s)
+       ============================================================ */
+
+    const TRIGGER_BURST = () => {
+      BTN_GEN.classList.remove("BURST");
+      void BTN_GEN.offsetWidth; /* restart animation */
+      BTN_GEN.classList.add("BURST");
+      setTimeout(() => BTN_GEN.classList.remove("BURST"), 800);
+    };
+
+    /* ============================================================
+       ## RENDER
+       ============================================================ */
+
+    const RENDER = (BASE_MINUTES) => {
+      EL_ROWS.innerHTML = "";
+
+      const STEP = GET_STEP();
+      const PERIODS = BUILD_PERIODS(BASE_MINUTES, STEP.MINUTES);
+      const BASE_HHMM = FORMAT_HHMM(BASE_MINUTES);
+
+      /* normalize display + remember your choice */
+      EL_STEP.value = STEP.DISPLAY;
+      try { localStorage.setItem(STEP_KEY, STEP.DISPLAY); } catch {}
+
+      PERIODS.forEach((P, IDX) => {
+        const ROW = document.createElement("div");
+        ROW.className = "ROW";
+
+        const ROLLOVER = P.MINUTES >= 1440 ? `(+${Math.floor(P.MINUTES / 1440)}d)` : "";
+        const COLOR = COLORS[IDX % COLORS.length];
+
+        ROW.innerHTML = `
+          <div class="LEFT">
+            <div class="LINE1">
+              <span class="PILL">
+                <span style="font-weight:950;">#${P.INDEX}</span>
+                <span style="color:var(--HINT); font-weight:900;">+</span>
+                <span style="font-weight:950;">${STEP.DISPLAY}</span>
+              </span>
+              <span class="LABEL">from ${BASE_HHMM}</span>
+            </div>
+          </div>
+
+          <div class="BIG">${P.HHMM} <span class="LABEL">${ROLLOVER}</span></div>
+          <div class="BAR" style="background:${COLOR};"></div>
+        `;
+
+        EL_ROWS.appendChild(ROW);
+      });
+
+      EL_NOTE.textContent =
+        `Step is ${GET_STEP().DISPLAY}. Output wraps at 24:00; day rollover shown as (+Nd).`;
+    };
+
+    /* ============================================================
+       ## ACTIONS
+       ============================================================ */
+
+    const GENERATE_FROM_UI = () => {
+      const BASE = PARSE_TIME_INPUT(EL_BASE.value);
+      const BASE_MINUTES = (BASE === null) ? NOW_MINUTES() : BASE;
+      RENDER(BASE_MINUTES);
+    };
+
+    const COPY_OUTPUT = async () => {
+      const BASE = PARSE_TIME_INPUT(EL_BASE.value);
+      const BASE_MINUTES = (BASE === null) ? NOW_MINUTES() : BASE;
+
+      const BASE_HHMM = FORMAT_HHMM(BASE_MINUTES);
+      const STEP = GET_STEP();
+      const PERIODS = BUILD_PERIODS(BASE_MINUTES, STEP.MINUTES);
+
+      const LINES = [
+        `Base: ${BASE_HHMM}`,
+        `Step: ${STEP.DISPLAY}`,
+        ...PERIODS.map(P => {
+          const R = P.MINUTES >= 1440 ? ` (+${Math.floor(P.MINUTES / 1440)}d)` : "";
+          return `#${P.INDEX}: ${P.HHMM}${R}`;
+        })
+      ];
+
+      try {
+        await navigator.clipboard.writeText(LINES.join("\n"));
+        BTN_COPY.textContent = "COPIED";
+        setTimeout(() => BTN_COPY.textContent = "COPY", 900);
+      } catch {
+        BTN_COPY.textContent = "NO CLIPBOARD";
+        setTimeout(() => BTN_COPY.textContent = "COPY", 1100);
+      }
+    };
+
+    /* ============================================================
+       ## INIT
+       ============================================================ */
+
+    BTN_DARKER.addEventListener("click", TOGGLE_THEME);
+    BTN_NOW.addEventListener("click", () => { SET_BASE_TO_NOW(); GENERATE_FROM_UI(); });
+    BTN_GEN.addEventListener("click", GENERATE_FROM_UI);
+    BTN_COPY.addEventListener("click", COPY_OUTPUT);
+
+    EL_BASE.addEventListener("keydown", (EV) => { if (EV.key === "Enter") GENERATE_FROM_UI(); });
+    EL_STEP.addEventListener("keydown", (EV) => { if (EV.key === "Enter") GENERATE_FROM_UI(); });
+
+    /* small convenience: if you tweak step, regen after a short pause */
+    let STEP_DEBOUNCE = null;
+    EL_STEP.addEventListener("input", () => {
+      if (STEP_DEBOUNCE) clearTimeout(STEP_DEBOUNCE);
+      STEP_DEBOUNCE = setTimeout(GENERATE_FROM_UI, 350);
+    });
+
+    try {
+      const SAVED_THEME = localStorage.getItem(THEME_KEY);
+      APPLY_THEME(SAVED_THEME === "darker" ? "darker" : "light");
+    } catch {
+      APPLY_THEME("light");
+    }
+
+    /* restore your last step if present */
+    try {
+      const SAVED_STEP = localStorage.getItem(STEP_KEY);
+      if (SAVED_STEP) EL_STEP.value = SAVED_STEP;
+    } catch {}
+
+    /* default: show NOW immediately */
+    SET_BASE_TO_NOW();
+    GENERATE_FROM_UI();
+
+    /* ✨ one-shot star burst at 10 seconds after load */
+    setTimeout(TRIGGER_BURST, 10_000);
+  </script>
+</body>
+</html>
