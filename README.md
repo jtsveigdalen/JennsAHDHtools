@@ -1,4 +1,4 @@
-# JennsAHDHtools
+# JennsADHDtools
 
 Small browser-based tools that help me wrangle my brain when ADHD chaos mode is active.
 
